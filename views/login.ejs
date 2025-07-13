@@ -150,9 +150,24 @@
     <a href="/" class="back-link">⬅ Kembali ke Beranda</a>
   </div>
   <script>
+    // Supabase Auth logic (login)
     const SUPABASE_URL = 'https://dizrhjlwjvihqykcbwub.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpenJoamx3anZpaHF5a2Nid3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MDk4MDUsImV4cCI6MjA2Nzk4NTgwNX0.jzD2GtmvAZK3eeDv_sBASXQnSPgzGPGni2dlVFq9qvo';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Handle Supabase OAuth redirect: save access_token from URL hash and redirect
+    if (window.location.hash && window.location.hash.includes('access_token=')) {
+      const params = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = params.get('access_token');
+      if (accessToken) {
+        localStorage.setItem('sb-access-token', accessToken);
+        // (optional) save refresh_token if needed
+        // const refreshToken = params.get('refresh_token');
+        // localStorage.setItem('sb-refresh-token', refreshToken);
+        window.location.hash = '';
+        window.location.href = '/dashboard';
+      }
+    }
 
     const loginForm = document.getElementById('login-form');
     const flashMessage = document.getElementById('flash-message');
@@ -165,7 +180,6 @@
       if (error) {
         flashMessage.innerHTML = `<div class='flash-message flash-error'>${error.message}</div>`;
       } else {
-        // Simpan session/token di localStorage
         localStorage.setItem('sb-access-token', data.session.access_token);
         window.location.href = '/dashboard';
       }
@@ -175,8 +189,6 @@
       const { data, error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
       if (error) {
         flashMessage.innerHTML = `<div class='flash-message flash-error'>${error.message}</div>`;
-      } else {
-        // Akan redirect ke Google, lalu kembali ke aplikasi
       }
     });
   </script>
